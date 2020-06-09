@@ -31,6 +31,8 @@ void setup()
   middle_finger.attach(14);
   ring_finger.attach(12);
   pinky.attach(13);
+
+  server.listen(80); // Listen to websocket requests at port 80.
 }
 
 void loop()
