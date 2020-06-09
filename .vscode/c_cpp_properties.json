@@ -7,7 +7,9 @@
                 "C:\\Users\\Yorick\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.2\\**",
                 "C:\\Users\\Yorick\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
                 "C:\\Users\\Yorick\\Documents\\Arduino\\libraries\\**",
-                "C:\\Users\\Yorick\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.1\\**"
+                "C:\\Users\\Yorick\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.1\\**",
+                "C:\\Users\\Yorick\\Documents\\Arduino\\libraries\\ArduinoWebsockets\\src\\**",
+                "C:\\Users\\Yorick\\Documents\\Arduino\\libraries\\ADC128D818\\**"
             ],
             "forcedInclude": [],
             "intelliSenseMode": "msvc-x64",

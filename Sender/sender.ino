@@ -1,11 +1,17 @@
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h> // Include the Arduino JSON parser library.
+#include <ArduinoWebsockets.h>
 #include <Wire.h>
+#include <ADC128D818.h>
 
 const char *ssid = "Robothand";       // The SSID (name) of the Wi-Fi network you want to connect to
 const char *password = "VeryRobotic"; // The password of the Wi-Fi network
-const char *serverName = "http://192.168.4.1/fingers";
+const char *websocket_server = "http://192.168.4.1:80";
+
+using namespace websockets;
+
+WebsocketsClient client;
+
+ADC128 adc(0x1D); // Add the adc at address 0x1D.
 
 void setup()
 {
@@ -13,9 +19,7 @@ void setup()
     Serial.begin(115200);
     delay(10);
 
-    WiFi.begin(ssid, password); // Connect to the network
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
+    WiFi.begin(ssid, password); // Connect to the network of the Hand-unit
 
     int i = 0;
     while (WiFi.status() != WL_CONNECTED)
@@ -23,10 +27,16 @@ void setup()
         delay(250);
         Serial.print('.');
     }
-    Serial.println();
 
-    Serial.println();
-    Serial.println(WiFi.localIP());
+    adc.start();
+
+    ADC128_channels temp = {0, 0, 0, 0, 0, 1, 1, 1}; // Turn off the last three channels for better performance and current usage.
+    adc.write_disabled_channels(temp);
+
+    while (!client.connect(websocket_server)) // Keep trying to connect to the websocket server.
+    {
+        delay(100);
+    }
 }
 
 void loop()
@@ -35,37 +45,20 @@ void loop()
     unsigned long last = millis();
     while ((millis() - last) < 1000)
     {
-        Wire.requestFrom(0x18, 10);
+        String data = "[";
 
-        uint8_t readings[10];
-        uint8_t i = 0;
+        data += String(adc.read_ADC_channel(0));
+        data += ",";
+        data += String(adc.read_ADC_channel(1));
+        data += ",";
+        data += String(adc.read_ADC_channel(2));
+        data += ",";
+        data += String(adc.read_ADC_channel(3));
+        data += ",";
+        data += String(adc.read_ADC_channel(4));
+        data += "]";
 
-        while (Wire.available()) // slave may send less than requested
-        {
-            readings[i++] = Wire.read();
-        }
-
-        HTTPClient http;
-
-        http.begin(serverName);
-        http.addHeader("content-type", "text/plain");
-
-        DynamicJsonDocument doc(100);
-
-        JsonArray data = doc.createNestedArray("f"); // Create a JSON object.
-        data.add((uint16_t)(readings[1] << 8) + readings[0]);        // Add all the measurements.
-        data.add((uint16_t)(readings[3] << 8) + readings[2]);
-        data.add((uint16_t)(readings[5] << 8) + readings[4]);
-        data.add((uint16_t)(readings[7] << 8) + readings[6]);
-        data.add((uint16_t)(readings[9] << 8) + readings[8]);
-
-        String JSON;
-        serializeJson(data, JSON); // Serialize the JSON object into a String.
-        // Serial.println(JSON);
-
-        int response = http.POST(JSON); // Post the HTTP message.
-
-        http.end(); // End the HTTP client.
+        client.send(data);
 
         j++;
     }
