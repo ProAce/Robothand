@@ -1,6 +1,5 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <ArduinoJson.h> // Include the Arduino JSON parser library.
 #include <Servo.h>
 #include <ArduinoWebsockets.h>
 
